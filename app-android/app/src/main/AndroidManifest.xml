@@ -154,6 +154,19 @@
 			</intent-filter>
 		</receiver>
 
+		<receiver
+				android:exported="true"
+				android:label="MyWidget"
+				android:icon="@drawable/ic_launcher_foreground"
+				android:name=".MyWidgetProvider">
+			<intent-filter>
+				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+			</intent-filter>
+			<meta-data
+					android:name="android.appwidget.provider"
+					android:resource="@xml/default_widget" />
+		</receiver>
+
 		<meta-data
 				android:name="android.webkit.WebView.MetricsOptOut"
 				android:value="true"/>

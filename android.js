@@ -15,6 +15,7 @@ import { buildWebapp } from "./buildSrc/buildWebapp.js"
 import { getTutanotaAppVersion, measure } from "./buildSrc/buildUtils.js"
 import path from "node:path"
 import { $, cd } from "zx"
+import os from "node:os"
 
 const log = (...messages) => console.log(chalk.green("\nBUILD:"), ...messages, "\n")
 
@@ -83,15 +84,31 @@ async function buildAndroid({ stage, host, buildType, existing, webClient }) {
 		// Ignoring the error if the folder is not there
 	}
 
-	const { version } = JSON.parse(await $`cat package.json`.quiet())
-	const apkName = `tutanota-tutao-${buildType}-${version}.apk`
-	const apkPath = `app-android/app/build/outputs/apk/tutao/${buildType}/${apkName}`
-	const outPath = `./build/app-android/${apkName}`
-	cd("./app-android")
-	await $`./gradlew assembleTutao${buildType}`
-	cd("..")
-	await $`mkdir -p build/app-android`
-	await $`mv ${apkPath} ${outPath}`
+	const isWindows = os.platform() === "win32"
+	if (isWindows) {
+		console.log(">>>>>>>>> DETECTED WINDOWS!")
+		const { version } = JSON.parse(await $`type package.json`.quiet())
+		const apkName = `tutanota-tutao-${buildType}-${version}.apk`
+		const apkPath = `app-android\\app\\build\\outputs\\apk\\tutao\\${buildType}\\${apkName}`
+		const outPath = `build\\app-android\\${apkName}`
+		cd("./app-android")
+		await $`dir`
+		await $`.\\gradlew.bat assembleTutao${buildType}`
+		cd("..")
+		await $`mkdirp build\\app-android`
+		await $`move ${apkPath} ${outPath}`
+	} else {
+		console.log(">>>>>>>>> DETECTED LINUX!")
+		const { version } = JSON.parse(await $`cat package.json`.quiet())
+		const apkName = `tutanota-tutao-${buildType}-${version}.apk`
+		const apkPath = `app-android/app/build/outputs/apk/tutao/${buildType}/${apkName}`
+		const outPath = `./build/app-android/${apkName}`
+		cd("./app-android")
+		await $`./gradlew assembleTutao${buildType}`
+		cd("..")
+		await $`mkdir -p build/app-android`
+		await $`mv ${apkPath} ${outPath}`
+	}
 
 	log(`Build complete. The APK is located at: ${outPath}`)
 
