@@ -9,9 +9,18 @@ set(ARGON2_DIR "${WEBASSEMBLY_LIBS_DIR}/phc-winner-argon2")
 set(LIBOQS_DIR "${WEBASSEMBLY_LIBS_DIR}/liboqs")
 set(C_LIBS_INCLUDE_DIR "${WEBASSEMBLY_LIBS_DIR}/include")
 
-add_custom_target(liboqs_include make -f Makefile_liboqs include
-        WORKING_DIRECTORY "${WEBASSEMBLY_LIBS_DIR}"
-        )
+# Check if the current platform is Windows
+if(WIN32)
+    # Use a different makefile for Windows
+    add_custom_target(liboqs_include make -f Makefile_liboqs_windows include
+            WORKING_DIRECTORY "${WEBASSEMBLY_LIBS_DIR}"
+            )
+else()
+    add_custom_target(liboqs_include make -f Makefile_liboqs include
+            WORKING_DIRECTORY "${WEBASSEMBLY_LIBS_DIR}"
+            )
+endif()
+
 
 add_library(tutanota SHARED
         argon2.cpp
